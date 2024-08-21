@@ -2,6 +2,11 @@
 import numpy as np
 from random import random
 
+
+# IMPORTANT
+# 2-D numpy arrays are normal matrices of mxn
+# 1-D numpy arrays are treated as column vectors (mx1 matrix) even though they look horizontal
+
 class Layer:
     def __init__(self, num_nodes_in: int, num_nodes_out: int, activation):
         self.num_nodes_in = num_nodes_in
@@ -16,12 +21,6 @@ class Layer:
         # (  ⋮       ⋮      ⋮     ⋮     )
         # ( w_m_0  w_m_1  ...  w_m_n  )     
 
-        # Let p be a row vector of size n (input size)
-        # Weight matrix represented in the code (size mxn):
-        # [ p_0 ]
-        # [ p_1 ]
-        # [ ... ]
-        # [ p_n ]
 
         # initialize weight matrix with random weights
         # numpy documentation suggests to use np.array rather than np.matrix
@@ -38,14 +37,13 @@ class Layer:
         # Let W be the weight matrix, a be the output vector after applying activations, b be the bias vector, i be the input vector
         # a = Act( (W)(i) + b)
         
-        
         # vecotrize makes it so this activation is applied to all elements in a numpy array
         @np.vectorize
-        def activate_all(output_value: float) -> float:
+        def activate_all(activation_func, output_value: float) -> float:
             '''Takes in a number and applies the activation function to it'''
-            return self.activation(output_value)
+            return activation_func(output_value)
 
-        outputs = self.weights.dot(input) + self.biases
-        activations = activate_all(outputs)
+        outputs = np.matmul(self.weights, input) + self.biases
+        activations = activate_all(self.activation.func, outputs)
         return activations
         
