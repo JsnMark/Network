@@ -13,7 +13,7 @@ class Network:
     
         self.layers = [layer.Layer(layer_sizes[i], layer_sizes[i+1], activation_list[i]) for i in range(len(layer_sizes) - 1)]
        
-    def feed_forward(self, inputs: list[float]):
+    def calculate_output(self, inputs: list[float]):
         '''Takes in a list of inputs and feeds them into the network which returns the output''' 
         # convert input list to column vector
         input_array = np.array(inputs)

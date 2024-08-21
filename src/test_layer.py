@@ -98,5 +98,44 @@ class TestLayer(unittest.TestCase):
         
         self.assertTrue(np.array_equal(layer.feed_forward(inputs), expected))
          
+    def test_cost_of_single_training_example(self):
+        inputs = np.array([0,1,1])
+        expected_outputs = np.array([1,0])
+        
+        layer = Layer(3,2,do_nothing)
+        weights = np.array([[1,2,3],
+                            [-1,-2,-3]])
+        biases = np.array([1,2])
+        self.assertEqual(weights.shape, layer.weights.shape)
+        self.assertEqual(biases.shape, layer.biases.shape)
+        layer.weights = weights
+        layer.biases = biases
+        
+        # output = [36, 9]
+        # cost = 45
+        
+        expected_cost = 34
+        actual_cost = layer.single_cost(inputs, expected_outputs)
+        self.assertEqual(expected_cost, actual_cost)
+    
+    def test_average_cost(self):
+        inputs = [np.array([0,1,1]), np.array([1,1,1])]
+        expected_outputs = [np.array([1,0]), np.array([0,1])]
+        
+        layer = Layer(3,2,do_nothing)
+        weights = np.array([[1,2,3],
+                            [-1,-2,-3]])
+        biases = np.array([1,2])
+        self.assertEqual(weights.shape, layer.weights.shape)
+        self.assertEqual(biases.shape, layer.biases.shape)
+        layer.weights = weights
+        layer.biases = biases
+        
+        expected_costs = [34, 74]
+        actual_costs = layer.cost_function(inputs, expected_outputs)
+        
+        self.assertEqual(sum(expected_costs)/2.0, actual_costs)
+
+        
 if __name__ == '__main__':
     unittest.main()

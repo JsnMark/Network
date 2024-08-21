@@ -26,7 +26,7 @@ class TestNetwork(unittest.TestCase):
         self.assertEqual(network.layers[2].num_nodes_in, 4)
         self.assertEqual(network.layers[2].num_nodes_out, 2)
     
-    def test_feed_forward_normal_case(self):
+    def test_calculate_output_normal_case(self):
         layers = [2,3,2]
         activations = [do_nothing, sigmoid]
         
@@ -60,7 +60,7 @@ class TestNetwork(unittest.TestCase):
         network.layers[1].weights = weight_2
         network.layers[1].biases = bias_2
         
-        self.assertTrue(np.allclose(network.feed_forward(input), expected_output))
+        self.assertTrue(np.allclose(network.calculate_output(input), expected_output))
         
         
         
