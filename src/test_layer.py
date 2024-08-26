@@ -11,8 +11,9 @@ class TestLayer(unittest.TestCase):
         
         self.assertEqual(layer.num_nodes_in, 3)
         self.assertEqual(layer.num_nodes_out, 2)
-        self.assertEqual(layer.activation, ReLu)
-        
+        self.assertIsInstance(layer.activation_function, ReLu)
+        self.assertEqual(layer.a_n, None)
+        self.assertEqual(layer.a_m, None)
         
         # Weights matrix (2x3 matrix)
         self.assertEqual(type(layer.weights), np.ndarray)
@@ -20,10 +21,19 @@ class TestLayer(unittest.TestCase):
         self.assertEqual(len(layer.weights[0]), 3)
         self.assertEqual(layer.weights.shape, (2,3))
         
+        self.assertEqual(type(layer.weight_gradient_matrix), np.ndarray)
+        self.assertEqual(len(layer.weight_gradient_matrix), 2)
+        self.assertEqual(len(layer.weight_gradient_matrix[0]), 3)
+        self.assertEqual(layer.weight_gradient_matrix.shape, (2,3))
+        
         # Bias vector (2x1)
         self.assertEqual(type(layer.biases), np.ndarray)
         self.assertEqual(len(layer.biases), 2)
         self.assertEqual(layer.biases.shape, (2,))
+        
+        self.assertEqual(type(layer.bias_gradient), np.ndarray)
+        self.assertEqual(len(layer.bias_gradient), 2)
+        self.assertEqual(layer.bias_gradient.shape, (2,))
     
     def test_feed_forward_multiplication_only(self):
         # Act((W)  (i)  + (b))
@@ -47,15 +57,14 @@ class TestLayer(unittest.TestCase):
         expected = np.array([14, 32])
         
         self.assertTrue(np.array_equal(layer.feed_forward(inputs), expected))
+        self.assertTrue(np.array_equal(layer.a_m, inputs))
+        self.assertTrue(np.array_equal(layer.a_n, expected))
         
     def test_feed_forward_addition(self):
         # Act((W)  (i)  + (b))
         # [1 2 3]  [1]    [1]    [15]
         # [4 5 6]  [2]  + [2]  = [34] 
         #          [3]     
-        class do_nothing:
-            def func(n):
-                return n
         
         layer = Layer(3,2,do_nothing)
         new_weights = np.array([[1,2,3],
@@ -115,26 +124,30 @@ class TestLayer(unittest.TestCase):
         # cost = 45
         
         expected_cost = 34
-        actual_cost = layer.single_cost(inputs, expected_outputs)
-        self.assertEqual(expected_cost, actual_cost)
+        actual_output = layer.feed_forward(inputs)
+        cost = layer.single_cost(actual_output, expected_outputs)
+        self.assertEqual(expected_cost, cost)
     
-    def test_average_cost(self):
-        inputs = [np.array([0,1,1]), np.array([1,1,1])]
-        expected_outputs = [np.array([1,0]), np.array([0,1])]
+
+    def test_calculate_gradient(self):
+        layer = Layer(3,2,ReLu)
+        weight = np.array([[1.0,2.0,3.0],
+                           [4.0,5.0,6.0]])
+        bias = np.array([0.0,0.0])
         
-        layer = Layer(3,2,do_nothing)
-        weights = np.array([[1,2,3],
-                            [-1,-2,-3]])
-        biases = np.array([1,2])
-        self.assertEqual(weights.shape, layer.weights.shape)
-        self.assertEqual(biases.shape, layer.biases.shape)
-        layer.weights = weights
-        layer.biases = biases
+        input = np.array([1.0,1.0,1.0])
+        expected_output = np.array([1.0,0.0])
         
-        expected_costs = [34, 74]
-        actual_costs = layer.cost_function(inputs, expected_outputs)
+        layer.weights = weight
+        layer.biases = bias
         
-        self.assertEqual(sum(expected_costs)/2.0, actual_costs)
+        actual_output = layer.feed_forward(input)
+        
+        print(layer.single_cost(actual_output, expected_output))
+        
+        layer.calculate_output_gradient(input, actual_output, expected_output)
+        
+        
 
         
 if __name__ == '__main__':

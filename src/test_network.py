@@ -1,5 +1,6 @@
 # test_network.py
 from network import *
+from layer import *
 from activations import ReLu, sigmoid, do_nothing
 import unittest
 import numpy as np
@@ -13,16 +14,15 @@ class TestNetwork(unittest.TestCase):
         network = Network(layers, activations)
         
         self.assertEqual(len(network.layers), 3)
-        
-        self.assertEqual(network.layers[0].activation, ReLu)
+        self.assertIsInstance(network.layers[0].activation, ReLu)
         self.assertEqual(network.layers[0].num_nodes_in, 2)
         self.assertEqual(network.layers[0].num_nodes_out, 3)
         
-        self.assertEqual(network.layers[1].activation, sigmoid)
+        self.assertIsInstance(network.layers[1].activation, sigmoid)
         self.assertEqual(network.layers[1].num_nodes_in, 3)
         self.assertEqual(network.layers[1].num_nodes_out, 4)
         
-        self.assertEqual(network.layers[2].activation, sigmoid)
+        self.assertIsInstance(network.layers[2].activation, sigmoid)
         self.assertEqual(network.layers[2].num_nodes_in, 4)
         self.assertEqual(network.layers[2].num_nodes_out, 2)
     
@@ -62,7 +62,24 @@ class TestNetwork(unittest.TestCase):
         
         self.assertTrue(np.allclose(network.calculate_output(input), expected_output))
         
+    def test_average_cost(self):
+        inputs = [np.array([0,1,1]), np.array([1,1,1])]
+        expected_outputs = [np.array([1,0]), np.array([0,1])]
         
+        network = Network([3,2], [do_nothing])
+        
+        weights = np.array([[1,2,3],
+                            [-1,-2,-3]])
+        biases = np.array([1,2])
+        self.assertEqual(weights.shape, network.layers[0].weights.shape)
+        self.assertEqual(biases.shape, network.layers[0].biases.shape)
+        network.layers[0].weights = weights
+        network.layers[0].biases = biases
+        
+        expected_costs = [34, 74]
+        actual_costs = network.cost_function(inputs, expected_outputs)
+        
+        self.assertEqual(sum(expected_costs)/2.0, actual_costs)
         
 if __name__ == '__main__':
     unittest.main()

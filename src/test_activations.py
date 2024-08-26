@@ -4,7 +4,7 @@ import unittest
 class TestActivations(unittest.TestCase):
     
     def test_sigmoid(self):
-        f = sigmoid
+        f = sigmoid()
         x = f.func(0.5)
         self.assertAlmostEqual(x, .6224593312018958)
         
@@ -14,9 +14,8 @@ class TestActivations(unittest.TestCase):
         x = f.func(0)
         self.assertAlmostEqual(x, 0.5)
 
-
     def test_ReLu(self):
-        f = ReLu
+        f = ReLu()
         x = f.func(0.5)
         self.assertAlmostEqual(x, .5)
         

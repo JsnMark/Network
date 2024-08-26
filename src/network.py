@@ -24,3 +24,33 @@ class Network:
             input_array = layer.feed_forward(input_array)
             
         return input_array
+    
+    def cost_function(self, training_data: list[np.array], expected_outputs: list[np.array]):
+        '''Finds the average cost of training data. training_data elements 
+        must correlate with expected_outputs elements at the same indexes'''
+        last_layer = self.layers[-1]
+        cost = 0.0
+        # manually find len of data since redundant to go through the data again using len()
+        data_len = 0
+        for data_point, expected_output in zip(training_data, expected_outputs):
+            cost += last_layer.single_cost(data_point, expected_output)
+            data_len += 1
+            
+        cost = cost / data_len
+        return cost
+    
+    
+    def backpropogation(self, training_datas: list[np.array], expected_outputs: list[np.array]):
+        '''Performs backpropogation, adjusting the layers's weights and biases'''
+        output_layer = self.layers[-1]
+        
+        for training_data, expected_output in zip(training_datas, expected_outputs):
+            actual_output = output_layer.feed_forward(training_data)
+            dc_da_m = output_layer.calculate_output_gradient(actual_output, expected_output)
+            
+            for layer in self.layers[:-1]:
+                dc_da_m = layer.calculate_hidden_gradient(dc_da_m)
+        
+        
+        
+        
