@@ -1,6 +1,7 @@
 # network.py
 import layer
 import numpy as np
+from copy import deepcopy
 
 class Network:
     def __init__(self, layer_sizes: list, activation_list: list):
@@ -13,26 +14,33 @@ class Network:
     
         self.layers = [layer.Layer(layer_sizes[i], layer_sizes[i+1], activation_list[i]) for i in range(len(layer_sizes) - 1)]
        
-    def calculate_output(self, inputs: list[float]):
-        '''Takes in a list of inputs and feeds them into the network which returns the output''' 
-        # convert input list to column vector
-        input_array = np.array(inputs)
+    def calculate_output(self, input: np.array):
+        '''Takes in an input and feeds them into the network which returns the output''' 
         
         # For each layer, feed forward 
         # (Apply linear transformations to the each vector and apply an actication function to the transformed vector)
+        outputs = deepcopy(input)
         for layer in self.layers:
-            input_array = layer.feed_forward(input_array)
+            outputs = layer.feed_forward(outputs)
             
-        return input_array
+        return outputs
     
-    def cost_function(self, training_data: list[np.array], expected_outputs: list[np.array]):
+    def calculate_outputs(self, inputs: list[np.array]):
+        outputs = []
+        for input in inputs:
+            outputs.append(self.calculate_output(input))
+        return outputs
+            
+    
+    def cost_function(self, actual_output: list[np.array], expected_outputs: list[np.array]):
         '''Finds the average cost of training data. training_data elements 
         must correlate with expected_outputs elements at the same indexes'''
+        
         last_layer = self.layers[-1]
         cost = 0.0
         # manually find len of data since redundant to go through the data again using len()
         data_len = 0
-        for data_point, expected_output in zip(training_data, expected_outputs):
+        for data_point, expected_output in zip(actual_output, expected_outputs):
             cost += last_layer.single_cost(data_point, expected_output)
             data_len += 1
             
@@ -40,16 +48,19 @@ class Network:
         return cost
     
     
-    def backpropogation(self, training_datas: list[np.array], expected_outputs: list[np.array]):
+    def backpropogation(self, training_datas: list[np.array], expected_outputs: list[np.array], learn_rate):
         '''Performs backpropogation, adjusting the layers's weights and biases'''
         output_layer = self.layers[-1]
         
         for training_data, expected_output in zip(training_datas, expected_outputs):
-            actual_output = output_layer.feed_forward(training_data)
+            
+            actual_output = self.calculate_output(training_data)
             dc_da_m = output_layer.calculate_output_gradient(actual_output, expected_output)
+            output_layer.update_using_gradient(learn_rate)
             
             for layer in self.layers[:-1]:
                 dc_da_m = layer.calculate_hidden_gradient(dc_da_m)
+                layer.update_using_gradient(learn_rate)
         
         
         

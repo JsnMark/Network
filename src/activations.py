@@ -1,7 +1,6 @@
 # activations.py
 from math import e
 
-
 class sigmoid:
     def func(self, n: float) -> float:
         return 1.0 / ( 1 + e ** (-n))

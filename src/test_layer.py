@@ -128,27 +128,37 @@ class TestLayer(unittest.TestCase):
         cost = layer.single_cost(actual_output, expected_outputs)
         self.assertEqual(expected_cost, cost)
     
+    def test_calculate_output_gradient(self):
+        layer = Layer(3,2, ReLu)
+        layer.weights = np.array([[1,2,3],
+                                  [4,5,6]])
+        layer.biases = np.array([0,1])
+        
+        input = np.array([0,1,2])
+        output = layer.feed_forward(input)
+        expected_output = np.array([1,0])
+        
+        # Should be of length of previous layer
+        self.assertEqual(layer.calculate_output_gradient(output, expected_output).shape, (3,))
+        self.assertEqual(layer.weight_gradient_matrix.shape, layer.weights.shape)
+        self.assertEqual(layer.bias_gradient.shape, layer.biases.shape)
+        
+    def test_calculate_hidden_gradient(self):
+        layer = Layer(2,3, ReLu)
+        layer.weights = np.array([[1,2],
+                                [3,4],
+                                [5,6]])
+        layer.biases = np.array([0,1,2])
+        
+        input = np.array([2,3])
+        layer.feed_forward(input)
 
-    def test_calculate_gradient(self):
-        layer = Layer(3,2,ReLu)
-        weight = np.array([[1.0,2.0,3.0],
-                           [4.0,5.0,6.0]])
-        bias = np.array([0.0,0.0])
-        
-        input = np.array([1.0,1.0,1.0])
-        expected_output = np.array([1.0,0.0])
-        
-        layer.weights = weight
-        layer.biases = bias
-        
-        actual_output = layer.feed_forward(input)
-        
-        print(layer.single_cost(actual_output, expected_output))
-        
-        layer.calculate_output_gradient(input, actual_output, expected_output)
-        
-        
-
+        # assume we know this
+        dc_da_m = np.array([1, 2, 3])
+        dc_da_m = layer.calculate_hidden_gradient(dc_da_m)
+        self.assertEqual(dc_da_m.shape, (2,))
+        self.assertEqual(layer.weight_gradient_matrix.shape, layer.weights.shape)
+        self.assertEqual(layer.bias_gradient.shape, layer.biases.shape)
         
 if __name__ == '__main__':
     unittest.main()
