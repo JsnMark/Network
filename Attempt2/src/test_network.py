@@ -5,6 +5,7 @@ import numpy as np
 from activations import *
 from layers import *
 from network import *
+import math
 
 class TestNetwork(unittest.TestCase):
     def test_network_has_correct_parameters(self):
@@ -71,6 +72,34 @@ class TestNetwork(unittest.TestCase):
         expected_cost = np.array([10, 353.5, 1150])
         cost = network.cost_function(inputs, expected_outputs)    
         self.assertTrue(np.allclose(expected_cost, cost))
+        
+            
+    def test_gradient_descent_lowers_cost(self):
+        network = Network([2,3,3,2],[Sigmoid, Sigmoid, Sigmoid])
+        
+        X = np.array(([3,5], 
+                      [5,1], 
+                      [1,2],
+                      [2,2]))
+        y = np.array(([7,2], 
+                      [8,2], 
+                      [9,1],
+                      [3,1]))
+
+        original_cost = network.cost_function(X, y)
+        
+        W, B = network.gradient_descent(X, y)
+        network.update_gradients(W, B, 0.01)
+        new_cost = network.cost_function(X, y)
+        
+        self.assertLessEqual(sum(new_cost), sum(original_cost))
+        
+
+
+
+
+
+
 
 if __name__ == "__main__":
     unittest.main()

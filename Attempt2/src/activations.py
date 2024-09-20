@@ -18,11 +18,28 @@ class Activation:
         pass
 
 class Sigmoid(Activation):
+    @np.vectorize
     def function(z):
-        return 1 / (1 + np.exp(-z))
+        if z > 0:
+            return 1 / (1 + np.exp(-z))
+        else:
+            return np.exp(z) / (1 + np.exp(z))
     
     def derivative(z):
         return np.exp(-z) / ((1 + np.exp(-z)) ** 2)
+    
+    
+class ReLu(Activation):
+    @np.vectorize
+    def function(z):
+        return max(0.0, z)
+    
+    @np.vectorize
+    def derivative(z):
+        if z <= 0 :
+            return 0
+        else:
+            return 1
     
 class DoNothing(Activation):
     def function(z):
